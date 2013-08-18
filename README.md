@@ -11,11 +11,11 @@ Simple Node.js application with Redis and REST API.
     $ cd node-redis-rest
     $ npm install
 
- Run Redis:
+ Run Redis server:
 
     $ <redis>/src/redis-server
 
- Start the server:
+ Start Node.js server:
 
     $ node app
 
