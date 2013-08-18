@@ -1,0 +1,9 @@
+{
+  "name": "node-redis-rest",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "express": "3.3.5",
+    "redis": "0.8.4"
+  }
+}
