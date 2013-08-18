@@ -1,5 +1,8 @@
 node-redis-rest
 ===============
+
+Simple Node.js application with Redis and REST API.
+
 ## Usage
 
  Clone the repo and install dependencies:
