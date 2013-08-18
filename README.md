@@ -20,3 +20,9 @@ node-redis-rest
 
     http://localhost:3000/keys/*
     http://localhost:3000/key/foo
+
+## Dependencies
+
+[node_redis](https://github.com/mranney/node_redis) Node.js Redis client
+
+[Express](https://github.com/visionmedia/express) Node.js web framework
