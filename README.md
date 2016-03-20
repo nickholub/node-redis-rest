@@ -37,3 +37,6 @@ Simple Node.js application with Redis and REST API.
 [node_redis](https://github.com/mranney/node_redis) Node.js Redis client
 
 [Express](https://github.com/visionmedia/express) Node.js web framework
+
+[minimist](https://github.com/substack/minimist)
+Arg passing
