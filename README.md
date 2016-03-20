@@ -19,10 +19,18 @@ Simple Node.js application with Redis and REST API.
 
     $ node app
 
+ Args
+
+    optional --port 3500
+
   Test REST API, e.g.
 
-    http://localhost:3000/keys/*
-    http://localhost:3000/key/foo
+    GET http://localhost:3000/keys/*
+    GET http://localhost:3000/key/foo
+    PUT http://localhost:3000/key/foo {"value": "Some Value"}
+    GET http://localhost:3000/hkey/foo
+    PUT http://localhost:3000/hkey/foo {"value": ["Some key", "Some value"]}
+
 
 ## Dependencies
 
