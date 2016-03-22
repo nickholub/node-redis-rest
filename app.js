@@ -13,8 +13,8 @@ var resources = [
   {
     'url': '/key/:key', 
     'operations': [
-      {'get': function(params, callback) {client.get(params.key, callback);}},
-      {'put': function(params, value, callback) {
+      {'get': function(params, next, callback) {client.get(params.key, callback);}},
+      {'put': function(params, value, next, callback) {
         if (!value.value) {
           next(new Error("Expecting json: {\"value\": \"...\"} and content type application/json"));
           return;
@@ -26,14 +26,14 @@ var resources = [
   {
     'url': '/keys/:pattern?', 
     'operations': [
-      {'get': function(params, callback) {client.get(params.pattern || "*", callback);}}
+      {'get': function(params, callback) {client.keys(params.pattern || "*", callback);}}
     ]
   },
   {
     'url': '/hkey/:key', 
     'operations': [
-      {'get': function(params, callback) {client.hgetall(params.key, callback);}},
-      {'put': function(params, value, callback) {
+      {'get': function(params, next, callback) {client.hgetall(params.key, callback);}},
+      {'put': function(params, value, next, callback) {
           if (!value.value.length) {
             throw new Error("Expecting json {\"value\": [\"key\": \"value\"]}")
             return;
@@ -67,7 +67,7 @@ function simpleResponder(res) {
 
 function getOperation(fnBody) {
   return function (req, res, next) {
-    fnBody(req.params, simpleResponder(res));
+    fnBody(req.params, next, simpleResponder(res));
   }
 }
 
@@ -75,7 +75,7 @@ function putOperation(fnBody) {
   return function(req, res, next) {
     var value = req.body;
 
-    fnBody(req.params, value, simpleResponder(res));
+    fnBody(req.params, value, next, simpleResponder(res));
   };
 }
 
