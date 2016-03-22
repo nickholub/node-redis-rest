@@ -1,27 +1,88 @@
 var express = require('express');
 var redis = require("redis");
 
+var argv = require('minimist')(process.argv.slice(2));
+
+
 var app = express();
 var client = redis.createClient();
 
-app.get('/keys/:pattern?', getKeys);
-app.get('/key/:key', getKeyDetails);
+app.use(require('connect').bodyParser());
 
-function getKeys(req, res, next) {
-  var pattern = req.params.pattern || "*";
-  console.log('getting keys matching pattern ' + pattern);
-  client.keys(pattern, function(err, keys) {
-    res.json(keys);
+var resources = [
+  {
+    'url': '/key/:key', 
+    'operations': [
+      {'get': function(params, next, callback) {client.get(params.key, callback);}},
+      {'put': function(params, value, next, callback) {
+        if (!value.value) {
+          next(new Error("Expecting json: {\"value\": \"...\"} and content type application/json"));
+          return;
+        }
+        client.set(params.key, value.value, callback);
+      }}
+    ]
+  },
+  {
+    'url': '/keys/:pattern?', 
+    'operations': [
+      {'get': function(params, callback) {client.keys(params.pattern || "*", callback);}}
+    ]
+  },
+  {
+    'url': '/hkey/:key', 
+    'operations': [
+      {'get': function(params, next, callback) {client.hgetall(params.key, callback);}},
+      {'put': function(params, value, next, callback) {
+          if (!value.value.length) {
+            throw new Error("Expecting json {\"value\": [\"key\": \"value\"]}")
+            return;
+          }
+
+          var fullData = [params.key].concat(value.value);
+          client.hset(fullData, callback);
+        }
+      }
+    ]
+  }
+];
+
+resources.forEach(function(resource) {
+  resource.operations.forEach(function(operation) {    
+    if (operation.put) {      
+      app.put(resource.url, putOperation(operation.put));      
+    }
+    if (operation.get) {
+      app.get(resource.url, getOperation(operation.get));
+    }
   });
+});
+
+function simpleResponder(res) {
+  return function(err, redisResponse) {
+    if (err) console.log (err);
+    res.send(redisResponse);
+  }
+};
+
+function getOperation(fnBody) {
+  return function (req, res, next) {
+    fnBody(req.params, next, simpleResponder(res));
+  }
 }
 
-function getKeyDetails(req, res, next) {
-  var key = req.params.key;
-  console.log('getting value of key ' + key);
-  client.get(key, function(err, value) {
-    res.json(value);
-  });
+function putOperation(fnBody) {
+  return function(req, res, next) {
+    var value = req.body;
+
+    fnBody(req.params, value, next, simpleResponder(res));
+  };
 }
 
-app.listen(3000);
-console.log('Express started on port 3000');
+var port = 3000;
+if (argv.port) {
+  port = argv.port;
+}
+
+app.listen(port);
+console.log('Express started on port ' + port);
